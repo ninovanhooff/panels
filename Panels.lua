@@ -30,14 +30,11 @@ import "./modules/Color"
 import "./modules/Effect"
 import "./modules/Input"
 import "./modules/Image"
-import "./modules/Menus"
-import "./modules/Alert"
 import "./modules/Panel"
 import "./modules/Layer"
 
 import "./modules/TextAlignment"
 import "./modules/Utils"
-import "./modules/Credits"
 
 -- PD function shortcuts
 local pdUpdateTimers = playdate.timer.updateTimers
@@ -64,8 +61,6 @@ local panelBoundaries = {}
 local transitionOutAnimator = nil
 local transitionInAnimator = nil
 
-local buttonIndicator = nil
-
 local numMenusOpen = 0
 local numMenusFullScreen = 0
 local menusAreFullScreen = false
@@ -79,7 +74,7 @@ local shouldFadeBG = false
 local gameDidFinish = false
 local numSequencesUnlocked = 0
 
-local alert = nil
+-- local alert = nil
 
 local isCutscene = false
 local cutsceneFinishCallback = nil
@@ -981,9 +976,9 @@ function Panels.update()
 		updateMenus()
 	end
 
-	if alert.isActive then
-		alert:udpate()
-	end
+	-- if alert.isActive then
+	-- 	alert:udpate()
+	-- end
 
 	pdUpdateTimers()
 end
@@ -1080,111 +1075,13 @@ function Panels.onMenuDidHide(menu)
 	end
 end
 
-function Panels.onMenuDidStartOver()
-	if not Panels.Settings.useChapterMenu and gameDidFinish then
-		onAlertDidStartOver()
-	else
-		alert:show()
-	end
-end
-
-function onAlertDidStartOver()
-	Panels.Audio.stopBGAudio()
-	Panels.unlockedSequences = {}
-	gameDidFinish = false
-	saveGameData()
-	unloadSequence()
-	currentSeqIndex = 1
-
-	Panels.vars = {}
-	Panels.mainMenu:hide()
-	createMenus(sequences, gameDidFinish, currentSeqIndex > 1)
-end
-
-function onAlertDidHide()
-	if alert.selection == 2 then
-		onAlertDidStartOver()
-	end
-end
 
 function shouldShowMainMenu()
-	local should = false
-	if Panels.Settings.showMenuOnLaunch then
-		if (currentSeqIndex and currentSeqIndex > 1) or Panels.Settings.skipMenuOnFirstLaunch == false then
-			should = true
-		end
-	end
-	if gameDidFinish then should = true end
-	return should
+	return false
 end
 
 -- -------------------------------------------------
 -- START GAME
-
-local function updateSystemMenu()
-	local sysMenu = playdate.getSystemMenu()
-	if Panels.Settings.useChapterMenu then
-		local chaptersMenuItem, error = sysMenu:addMenuItem("Chapters",
-			function()
-				Panels.creditsMenu:hide()
-				Panels.chapterMenu:show()
-			end
-		)
-		printError(error, "Error adding Chapters to system menu")
-	end
-
-	if Panels.Settings.showMainMenuOption then
-		local homeMenuItem, error = sysMenu:addMenuItem("Main Menu",
-			function()
-				Panels.creditsMenu:hide()
-				if Panels.chapterMenu then Panels.chapterMenu:hide() end
-				menusAreFullScreen = true
-				Panels.mainMenu:show()
-			end
-		)
-		printError(error, "Error adding Main Menu to system menu")
-	end
-
-
-	local creditsItem, error2 = sysMenu:addMenuItem("Credits",
-		function()
-			if Panels.chapterMenu then Panels.chapterMenu:hide() end
-			Panels.creditsMenu:show()
-		end
-	)
-	printError(error2, "Error adding Credits to system menu:")
-
-end
-
-local function createCreditsSequence()
-	local credits = Panels.Credits.new()
-	local img = gfx.image.new(400, credits.height + 44)
-	gfx.lockFocus(img)
-	credits:redraw(0)
-	gfx.unlockFocus()
-
-	credits = nil
-
-	local seq = {
-		delay = 1000,
-		transitionDuration = 1000,
-		direction = Panels.ScrollDirection.TOP_DOWN,
-		advanceControl = Panels.Input.A,
-
-		panels = {
-			{
-				frame = { height = img.height, margin = 4 },
-				borderless = true,
-
-				layers = {
-					{ img = img, y = 10 }
-				}
-			},
-		}
-	}
-
-	table.insert(Panels.comicData, seq)
-end
 
 function setDefaultFont()
 	if Panels.Settings.defaultFontFamily then
@@ -1209,8 +1106,6 @@ function Panels.startCutscene(comicData, callback)
 	cutsceneFinishCallback = callback
 	Panels.comicData = comicData
 	maxScrollVelocity = Panels.Settings.maxScrollSpeed
-	alert = Panels.Alert.new("Start Over?", "All progress will be lost.", { "Cancel", "Start Over" })
-	alert.onHide = onAlertDidHide
 
 	Panels.Audio.createTypingSound()
 	validateSettings()
@@ -1222,38 +1117,6 @@ function Panels.startCutscene(comicData, callback)
 	playdate.inputHandlers.push({
 		cranked = Panels.cranked
 	})
-end
-
-function Panels.start(comicData)
-	setDefaultFont()
-	Panels.comicData = comicData
-	maxScrollVelocity = Panels.Settings.maxScrollSpeed
-	alert = Panels.Alert.new("Start Over?", "All progress will be lost.", { "Cancel", "Start Over" })
-	alert.onHide = onAlertDidHide
-	Panels.Audio.createTypingSound()
-	if Panels.Settings.showCreditsOnGameOver then
-		createCreditsSequence()
-	end
-
-	transitionFader = gfx.image.new(ScreenWidth, ScreenHeight)
-
-	sequences = Panels.comicData
-
-	loadGameData()
-	validateSettings()
-	updateSystemMenu()
-
-	createMenus(sequences, gameDidFinish, currentSeqIndex and currentSeqIndex > 1)
-
-	if shouldShowMainMenu() then
-		menusAreFullScreen = true
-		Panels.mainMenu:show()
-	else
-		loadSequence(currentSeqIndex)
-	end
-
-	playdate.update = Panels.update
-	playdate.cranked = Panels.cranked
 end
 
 -- -------------------------------------------------
