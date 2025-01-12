@@ -3,7 +3,7 @@
 
 import "CoreLibs/object"
 import "CoreLibs/graphics"
-import "CoreLibs/sprites"
+import "CoreLibs/animator"
 import "CoreLibs/timer"
 import "CoreLibs/animation"
 import "CoreLibs/crank"
