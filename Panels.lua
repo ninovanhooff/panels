@@ -624,6 +624,7 @@ local function unloadSequence()
 		if p.wasOnScreen then
 			p:reset()
 		end
+		p.borderImage = nil
 		p.sfxPlayer = nil
 		if p.layers then
 			for j, l in ipairs(p.layers) do
