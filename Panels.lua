@@ -61,10 +61,10 @@ local panelBoundaries = {}
 local transitionOutAnimator = nil
 local transitionInAnimator = nil
 
-local numMenusOpen = 0
-local numMenusFullScreen = 0
+--local numMenusOpen = 0
+--local numMenusFullScreen = 0
 local menusAreFullScreen = false
-local chapterDidSelect = false
+--local chapterDidSelect = false
 
 local panelTransitionAnimator = nil
 local previousBGColor = nil
@@ -72,7 +72,7 @@ local transitionFader = nil
 local shouldFadeBG = false
 
 local gameDidFinish = false
-local numSequencesUnlocked = 0
+--local numSequencesUnlocked = 0
 
 -- local alert = nil
 
@@ -683,11 +683,11 @@ local function nextSequence()
 	if targetSequence then
 		loadSequence(targetIndex)
 		targetSequence = nil
-		updateMenuData(sequences, gameDidFinish, currentSeqIndex > 1)
+		-- updateMenuData(sequences, gameDidFinish, currentSeqIndex > 1)
 	elseif currentSeqIndex < #sequences and not isDeadEnd then
 		currentSeqIndex = currentSeqIndex + 1
 		loadSequence(currentSeqIndex)
-		updateMenuData(sequences, gameDidFinish, currentSeqIndex > 1)
+		-- updateMenuData(sequences, gameDidFinish, currentSeqIndex > 1)
 	elseif isCutscene then
 		playdate.inputHandlers.pop()
 		gameDidFinish = true
@@ -696,14 +696,14 @@ local function nextSequence()
 		previousBGColor = nil -- prevent future cross-fade attempt
 	else
 		gameDidFinish = true
-		updateMenuData(sequences, gameDidFinish, currentSeqIndex > 1)
+		-- updateMenuData(sequences, gameDidFinish, currentSeqIndex > 1)
 		menusAreFullScreen = true
 
 		if Panels.Settings.resetVarsOnGameOver then
 			Panels.vars = {}
 		end
 		Panels.Audio.killBGAudio()
-		Panels.mainMenu:show()
+		-- Panels.mainMenu:show()
 	end
 end
 
@@ -972,9 +972,9 @@ function Panels.update()
 		drawButtonIndicators(offset)
 	end
 
-	if numMenusOpen > 0 then
-		updateMenus()
-	end
+	--if numMenusOpen > 0 then
+	--	updateMenus()
+	--end
 
 	-- if alert.isActive then
 	-- 	alert:udpate()
@@ -1018,62 +1018,62 @@ end
 -- -------------------------------------------------
 -- MENU HANDLERS
 
-function Panels.onChapterSelected(chapter)
-	chapterDidSelect = true
-	Panels.Audio.stopBGAudio()
-	unloadSequence()
-	currentSeqIndex = chapter
-	loadSequence(currentSeqIndex)
-end
+--function Panels.onChapterSelected(chapter)
+--	chapterDidSelect = true
+--	Panels.Audio.stopBGAudio()
+--	unloadSequence()
+--	currentSeqIndex = chapter
+--	loadSequence(currentSeqIndex)
+--end
+--
+--function Panels.onMenuWillShow(menu)
+--	numMenusOpen = numMenusOpen + 1
+--	Panels.Audio.pauseBGAudio()
+--	Panels.Audio.muteTypingSounds()
+--
+--	if panels then
+--		for i, p in ipairs(panels) do
+--			if p.wasOnScreen then
+--				p:pauseSounds()
+--			end
+--		end
+--	end
+--end
 
-function Panels.onMenuWillShow(menu)
-	numMenusOpen = numMenusOpen + 1
-	Panels.Audio.pauseBGAudio()
-	Panels.Audio.muteTypingSounds()
-
-	if panels then
-		for i, p in ipairs(panels) do
-			if p.wasOnScreen then
-				p:pauseSounds()
-			end
-		end
-	end
-end
-
-function Panels.onMenuDidShow()
-	menusAreFullScreen = true
-	numMenusFullScreen = numMenusFullScreen + 1
-end
-
-function Panels.onMenuWillHide(menu)
-	if menu == Panels.mainMenu then
-		if not chapterDidSelect then
-			Panels.Audio.unmuteTypingSounds()
-			loadSequence(currentSeqIndex)
-		end
-	end
-	numMenusFullScreen = numMenusFullScreen - 1
-
-	if numMenusFullScreen < 1 then
-		menusAreFullScreen = false
-	end
-end
-
-function Panels.onMenuDidHide(menu)
-	numMenusOpen = numMenusOpen - 1
-	if numMenusOpen < 1 then
-		Panels.Audio.resumeBGAudio()
-		Panels.Audio.unmuteTypingSounds()
-		if panels then
-			for i, p in ipairs(panels) do
-				if p.wasOnScreen then
-					p:unPauseSounds()
-				end
-			end
-		end
-		chapterDidSelect = false
-	end
-end
+--function Panels.onMenuDidShow()
+--	menusAreFullScreen = true
+--	numMenusFullScreen = numMenusFullScreen + 1
+--end
+--
+--function Panels.onMenuWillHide(menu)
+--	if menu == Panels.mainMenu then
+--		if not chapterDidSelect then
+--			Panels.Audio.unmuteTypingSounds()
+--			loadSequence(currentSeqIndex)
+--		end
+--	end
+--	numMenusFullScreen = numMenusFullScreen - 1
+--
+--	if numMenusFullScreen < 1 then
+--		menusAreFullScreen = false
+--	end
+--end
+--
+--function Panels.onMenuDidHide(menu)
+--	numMenusOpen = numMenusOpen - 1
+--	if numMenusOpen < 1 then
+--		Panels.Audio.resumeBGAudio()
+--		Panels.Audio.unmuteTypingSounds()
+--		if panels then
+--			for i, p in ipairs(panels) do
+--				if p.wasOnScreen then
+--					p:unPauseSounds()
+--				end
+--			end
+--		end
+--		chapterDidSelect = false
+--	end
+--end
 
 
 function shouldShowMainMenu()
